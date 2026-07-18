@@ -163,8 +163,9 @@
   }
 
   .pad .name{
-    font-size:15.5px; font-weight:600; line-height:1.35;
+    font-size:17px; font-weight:600; line-height:1.32;
     margin-top:20px; margin-bottom:auto; word-break:break-word;
+    white-space:pre-wrap;
     outline:none; color:#5a2038;
   }
   .pad .name:focus{ color:var(--cue-amber); }
@@ -311,7 +312,7 @@
       border-color:#e893b8;
       min-height:120px; padding:12px 10px 10px;
     }
-    .pad .name{ color:#5a2038; font-size:13.5px; margin-bottom:auto; }
+    .pad .name{ color:#5a2038; font-size:15px; margin-bottom:auto; }
     .pad .key{
       color:#c2447a; border-color:#e893b8;
       background:rgba(194,68,122,.08);
@@ -359,7 +360,7 @@
 
     main{ padding:14px 14px 32px; }
     #grid{ grid-template-columns:repeat(2,1fr); gap:10px; }
-    .pad .name{ font-size:13px; margin-top:18px; }
+    .pad .name{ font-size:14.5px; margin-top:18px; }
     .pad .drag-handle{ left:24px; font-size:12px; }
     .pad .padbtns{ gap:4px; }
 
@@ -607,7 +608,7 @@
       <span class="drag-handle" title="ドラッグして移動">⠿</span>
       <span class="key">${key ? key.toUpperCase() : '—'}</span>
       <span class="loopflag" style="${initLoop ? '' : 'display:none;'}">LOOP</span>
-      <div class="name" contenteditable="true" spellcheck="false">${escapeHtml(baseName)}</div>
+      <div class="name" contenteditable="true" spellcheck="false">${nameToHtml(baseName)}</div>
       <div class="meta">
         <div class="wave">${makeWave()}</div>
         <span class="dur">--:--</span>
@@ -678,9 +679,13 @@
 
     const nameEl = el.querySelector('.name');
     nameEl.addEventListener('click', e=>e.stopPropagation());
-    nameEl.addEventListener('blur', ()=>{ pad.name = nameEl.textContent.trim() || baseName; saveState(); });
+    nameEl.addEventListener('blur', ()=>{ pad.name = nameEl.innerText.trim() || baseName; saveState(); });
+    nameEl.addEventListener('input', ()=>{ pad.name = nameEl.innerText.trim() || baseName; saveState(); });
     nameEl.addEventListener('keydown', e=>{
-      if(e.key === 'Enter'){ e.preventDefault(); nameEl.blur(); }
+      if(e.key === 'Enter'){
+        e.preventDefault();
+        document.execCommand('insertLineBreak');
+      }
     });
 
     enableDrag(pad);
@@ -745,6 +750,10 @@
 
   function escapeHtml(str){
     return str.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  // 改行を含む名前をパッド表示用HTMLに変換（\n → <br>）
+  function nameToHtml(name){
+    return escapeHtml(name).split('\n').join('<br>');
   }
 
   fileInput.addEventListener('change', (e)=>{
