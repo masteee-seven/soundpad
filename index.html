@@ -389,7 +389,7 @@
   </div>
   <div class="console-controls">
     <label class="btn primary" for="fileInput">＋ 音声を読み込む</label>
-    <input id="fileInput" type="file" accept="audio/*" multiple>
+    <input id="fileInput" type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.flac,.aiff,.caf,.wma" multiple>
     <button class="btn" id="lockBtn">🔓 ロック</button>
     <button class="btn stop" id="stopAll">■ 全停止</button>
     <button class="btn" id="newBtn" title="すべてのパッドを削除して新規作成">🗑 新規作成</button>
@@ -778,7 +778,12 @@
   document.body.addEventListener('drop', e=>{
     e.preventDefault();
     if(dragSrcId) return; // パッド並び替え中はファイルD&D無視
-    const files = Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith('audio/'));
+    // MIMEタイプが正しく付与されないファイル（一部のクラウド経由ファイル等）にも対応し、
+    // 拡張子でも判定するようにする
+    const AUDIO_EXT = /\.(mp3|wav|m4a|aac|ogg|flac|aiff|caf|wma)$/i;
+    const files = Array.from(e.dataTransfer.files).filter(f=>
+      f.type.startsWith('audio/') || AUDIO_EXT.test(f.name)
+    );
     files.forEach(addFile);
   });
 
