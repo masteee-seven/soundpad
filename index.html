@@ -608,7 +608,7 @@
       <span class="drag-handle" title="ドラッグして移動">⠿</span>
       <span class="key">${key ? key.toUpperCase() : '—'}</span>
       <span class="loopflag" style="${initLoop ? '' : 'display:none;'}">LOOP</span>
-      <div class="name" contenteditable="true" spellcheck="false">${nameToHtml(baseName)}</div>
+      <div class="name" contenteditable="${locked ? 'false' : 'true'}" spellcheck="false">${nameToHtml(baseName)}</div>
       <div class="meta">
         <div class="wave">${makeWave()}</div>
         <span class="dur">--:--</span>
@@ -821,6 +821,15 @@
     document.body.classList.toggle('locked', locked);
     lockBtn.classList.toggle('locked', locked);
     lockBtn.textContent = locked ? '🔒 ロック中' : '🔓 ロック';
+    // CSSのpointer-events:noneだけではiPad Safariでcontenteditableのタッチ入力を
+    // 完全に防げない場合があるため、属性自体も確実に切り替える
+    pads.forEach(p=>{
+      const nameEl = p.el.querySelector('.name');
+      if(nameEl){
+        if(locked) nameEl.blur();
+        nameEl.setAttribute('contenteditable', locked ? 'false' : 'true');
+      }
+    });
   });
 
   document.addEventListener('keydown', (e)=>{
